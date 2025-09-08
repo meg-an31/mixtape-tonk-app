@@ -1,0 +1,9 @@
+{
+  "name": "basic-mixtape",
+  "plan": {
+    "platform": "react",
+    "projectName": "basic-mixtape",
+    "description": "cool mixtape app (mvp)"
+  },
+  "template": "react"
+}
