@@ -1,5 +1,5 @@
-import React from 'react';
-import { TapeObject, textObject, linkObject, PaletteObject } from '../types/ScrollBoxData';
+import React, {useMemo} from 'react';
+import { TapeObject, textObject, linkObject, imageObject, PaletteObject } from '../types/ScrollBoxData';
 import DraggableWrapper from './ObjectComponent';
 
 interface SidebarTapeItemProps {
@@ -8,7 +8,7 @@ interface SidebarTapeItemProps {
 
 const SidebarTapeItem: React.FC<SidebarTapeItemProps> = ({ item }) => {
   const renderObjectContent = () => {
-    if (!("url" in item)) {
+    if (!("url" in item) && !("blob" in item)) {
       const textObj = item as textObject;
       return (
         <span 
@@ -32,6 +32,21 @@ const SidebarTapeItem: React.FC<SidebarTapeItemProps> = ({ item }) => {
           {linkObj.text ? linkObj.text : linkObj.url}
         </a>
       );
+    } else if ('blob' in item) {
+      const imageObj = item as imageObject;
+      
+      const imageUrl = useMemo(() => {
+        const uint8Array = new Uint8Array(imageObj.blob);
+        if (uint8Array.length === 0) {
+          console.error('Empty image data for:', imageObj.name);
+          return '';
+        }
+        const blob = new Blob([uint8Array], { type: 'image/png' });
+        return URL.createObjectURL(blob);
+      }, [imageObj.blob]);
+
+
+      return (<img src={imageUrl} alt="Image" style={{minWidth: '20px', minHeight: '20px', imageRendering: 'pixelated'}} />);
     }
     return null;
   };

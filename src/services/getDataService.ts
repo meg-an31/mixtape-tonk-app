@@ -20,6 +20,16 @@ export async function loadTapeObjects(): Promise<{[key: string]: {tapeObj: TapeO
         objects_raw = test;
     }
     finally {
+        // Fix corrupted Uint8Array data in tape objects
+        Object.keys(objects_raw).forEach(key => {
+            const tapeObj = objects_raw[key].tapeObj;
+            if (tapeObj?.paletteObject && 'blob' in tapeObj.paletteObject && 
+                tapeObj.paletteObject.blob && typeof tapeObj.paletteObject.blob === 'object') {
+                const blobArray = Object.values(tapeObj.paletteObject.blob as unknown as Record<string, number>);
+                tapeObj.paletteObject.blob = new Uint8Array(blobArray);
+            }
+        });
+        
         return objects_raw;
     }
 }
@@ -51,7 +61,23 @@ export async function removeTapeObject(key: string) {
 export async function loadPaletteObjects(): Promise<PaletteObject[]> {
     await SyncService.init();
     const vfs = await SyncService.getVfs();
+    console.log("getting peer id...");
+    const peerId = await SyncService.getPeerId();
     var objects_raw: PaletteObject[]= JSON.parse(JSON.parse(JSON.parse(await vfs.readFile(SyncService.ObjectsPath)).content)).objects;
+    
+    // Fix corrupted Uint8Array data from JSON serialization
+    objects_raw = objects_raw.map(obj => {
+        if ('blob' in obj && obj.blob && typeof obj.blob === 'object') {
+            // Convert the JSON object back to Uint8Array
+            const blobArray = Object.values(obj.blob as unknown as Record<string, number>);
+            return {
+                ...obj,
+                blob: new Uint8Array(blobArray)
+            };
+        }
+        return obj;
+    });
+    
     return objects_raw;
 }
 
