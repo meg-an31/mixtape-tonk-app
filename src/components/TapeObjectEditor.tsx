@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { textObject, linkObject } from '../types/ScrollBoxData';
+import { textObject, linkObject, imageObject } from '../types/ScrollBoxData';
 
 export interface TapeObjectEditorProps {
   onSave?: (data: TapeObjectEditorData) => Promise<void>;
@@ -8,9 +8,10 @@ export interface TapeObjectEditorProps {
 
 export interface TapeObjectEditorData {
   position: { x: number; y: number; z: number };
-  objectType: 'text' | 'link';
+  objectType: 'text' | 'link' | 'image';
   textObject?: textObject;
   linkObject?: linkObject;
+  imageObject?: imageObject;
 }
 
 const TapeObjectEditor: React.FC<TapeObjectEditorProps> = ({
@@ -23,13 +24,18 @@ const TapeObjectEditor: React.FC<TapeObjectEditorProps> = ({
     z: initialData?.position?.z ?? 1
   });
   
-  const [objectType, setObjectType] = useState<'text' | 'link'>(
-    initialData?.objectType ?? 'text'
+  const [objectType, setObjectType] = useState<'text' | 'link' | 'image'>(
+    initialData?.objectType ?? 'text' 
   );
   
   const [textData, setTextData] = useState<textObject>({
     text: initialData?.textObject?.text ?? 'hello world',
     textColour: initialData?.textObject?.textColour ?? '#000000'
+  });
+
+  const [imageData, setImageData] = useState<imageObject>({
+    name: initialData?.imageObject?.name ?? 'hello world',
+    blob: initialData?.imageObject?.blob ?? new Uint8Array(),
   });
   
   const [linkData, setLinkData] = useState<linkObject>({
@@ -51,12 +57,24 @@ const TapeObjectEditor: React.FC<TapeObjectEditorProps> = ({
     setLinkData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleImageDataChange = (field: keyof imageObject, value: string | Uint8Array) => {
+    if (field == 'blob') {
+      const value_typed = value as Uint8Array;
+      setImageData(prev => ({ ...prev, [field]: value_typed }));
+    }
+    else {
+      const value_typed = value as string;
+      setImageData(prev => ({ ...prev, [field]: value_typed }));
+    }
+  };
+
   const handleSubmit = async () => {
     const editorData: TapeObjectEditorData = {
       position,
       objectType,
       textObject: objectType === 'text' ? textData : undefined,
-      linkObject: objectType === 'link' ? linkData : undefined
+      linkObject: objectType === 'link' ? linkData : undefined,
+      imageObject: objectType === 'image' ? imageData : undefined
     };
     
     console.log('Saving tape object data:', editorData);

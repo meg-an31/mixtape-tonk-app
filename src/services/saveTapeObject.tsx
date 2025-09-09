@@ -1,5 +1,5 @@
 import React from 'react';
-import { TapeObject, textObject, linkObject } from "../types/ScrollBoxData";
+import { TapeObject, textObject, imageObject, linkObject } from "../types/ScrollBoxData";
 import { TapeObjectEditorData } from '../components/TapeObjectEditor';
 //import oldData from '../stores/data.json';
 import { initializeTonk, createSyncEngine } from '@tonk/core';

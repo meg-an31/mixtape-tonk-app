@@ -3,7 +3,6 @@ export interface TapeReel {
   totalHeight: number;
 }
 
-
 // tape object is _an instance of a palette object_  
 // which exists on the tape ~~~
 export interface TapeObject {
@@ -13,7 +12,8 @@ export interface TapeObject {
   paletteObject: PaletteObject
 }
 
-export type PaletteObject = linkObject | textObject
+// just a way to group these items 
+export type PaletteObject = linkObject | textObject | imageObject
 
 export interface linkObject {
   url: string;
@@ -28,12 +28,15 @@ export interface textObject {
   id?: string;
 }
 
-// TODO: implement the sticker object
-export interface stickerObject {
+export interface imageObject {
+  name: string;
+  blob: Uint8Array;
+  id?: string;
+  versions?: object;
 }
 
-// TODO: implement the image object
-export interface imageObject {
+// TODO: implement the sticker object
+export interface stickerObject {
 }
 
 export interface ContainerProps {
