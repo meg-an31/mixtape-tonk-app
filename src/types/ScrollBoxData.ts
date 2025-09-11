@@ -9,6 +9,9 @@ export interface TapeObject {
   id: string,
   top: number, 
   left: number, 
+  scale?: number, // Scale factor for the object (default 1.0)
+  width?: number, // Container width in pixels (default auto)
+  height?: number, // Container height in pixels (default auto)
   paletteObject: PaletteObject
 }
 
@@ -33,6 +36,7 @@ export interface imageObject {
   blob: Uint8Array;
   id?: string;
   versions?: object;
+  mime?: string
 }
 
 // TODO: implement the sticker object
@@ -44,6 +48,8 @@ export interface ContainerProps {
   mainBoxItems: {[key: string]: {tapeObj: TapeObject}};
   onAddToMainBox: (itemId: string, tapeObject: TapeObject) => void;
   onUpdateMainBoxPosition: (itemId: string, position: {top: number, left: number}) => void;
+  onUpdateScale?: (itemId: string, scale: number) => void;
+  onUpdateDimensions?: (itemId: string, dimensions: {width?: number, height?: number}) => void;
 }
 
 export interface ContainerState {

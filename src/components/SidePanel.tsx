@@ -19,12 +19,19 @@ const SidePanel: React.FC<SidePanelProps> = ({
 
   return (
     <aside 
-      className={`bg-white border-l border-gray-200 ${positionClasses} ${className} h-screen flex flex-col`}
-      style={{ width, minWidth: width }}
+      className={`bg-gray-800 border-l border-gray-600 ${positionClasses} ${className} h-screen flex flex-col`}
+      style={{ 
+        width, 
+        minWidth: width,
+        background: 'linear-gradient(180deg, #2d3748 0%, #1a202c 100%)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+      }}
     >
       {title && (
-        <header className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <header className="px-6 py-4 border-b border-gray-600 flex-shrink-0" style={{
+          background: 'linear-gradient(180deg, #4a5568 0%, #2d3748 100%)'
+        }}>
+          <h2 className="text-lg font-semibold text-white">{title}</h2>
         </header>
       )}
       

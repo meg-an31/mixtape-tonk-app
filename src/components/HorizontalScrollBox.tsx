@@ -14,22 +14,27 @@ import { ContainerProps, ContainerState } from '../types/ScrollBoxData';
 const styles: CSSProperties = {
   width: '40%',
   height: 1000,
-  border: '1px solid black',
+  background: 'linear-gradient(145deg, #1a1a1a 0%, #000000 50%, #1a1a1a 100%)',
+  border: '3px solid #333',
+  borderRadius: '8px',
   position: 'relative',
   margin: "0 auto",
+  boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.3)',
 }
 
 export const Tape: FC<ContainerProps> = ({ 
   paletteItems, 
   mainBoxItems, 
   onAddToMainBox, 
-  onUpdateMainBoxPosition 
+  onUpdateMainBoxPosition,
+  onUpdateScale,
+  onUpdateDimensions 
 }) => {
   // Remove the local boxes state as we'll use mainBoxItems from props
 
   const moveBox = useCallback(
     (id: string, tapeObj: TapeObject) => {
-      onUpdateMainBoxPosition(id, tapeObj);
+      onUpdateMainBoxPosition(id, { top: tapeObj.top, left: tapeObj.left });
     },
     [onUpdateMainBoxPosition],
   )
@@ -69,17 +74,24 @@ export const Tape: FC<ContainerProps> = ({
                 id: newId,
                 top: relativeTop,
                 left: relativeLeft,
+                scale: 1.0,
+                width: undefined, // Let it use auto sizing initially
+                height: undefined, // Let it use auto sizing initially
                 paletteObject: draggedItem
               }
               onAddToMainBox(newId, new_tape_obj);
             }
           }
           else if (item.id && mainBoxItems[item.id]) {
+            const currentTapeObj = mainBoxItems[item.id].tapeObj;
             const newObj: TapeObject = {
               id: item.id,
-              paletteObject: mainBoxItems[item.id].tapeObj.paletteObject,
+              paletteObject: currentTapeObj.paletteObject,
               top: relativeTop, 
-              left: relativeLeft
+              left: relativeLeft,
+              scale: currentTapeObj.scale || 1.0,
+              width: currentTapeObj.width,
+              height: currentTapeObj.height
             };
             // this object already exists on the board! so we move it to the new position
             moveBox(item.id, newObj);
@@ -102,7 +114,12 @@ export const Tape: FC<ContainerProps> = ({
             item={tapeObj.paletteObject}
             itemId={key}
             position={{ left: tapeObj.left, top: tapeObj.top }}
+            scale={tapeObj.scale || 1.0}
+            width={tapeObj.width}
+            height={tapeObj.height}
             onPositionChange={onUpdateMainBoxPosition}
+            onScaleChange={onUpdateScale}
+            onDimensionChange={onUpdateDimensions}
           />
         );
       })}
