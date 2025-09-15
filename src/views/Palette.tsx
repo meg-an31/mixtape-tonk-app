@@ -3,7 +3,7 @@ import { saveTapeObject } from "../services/saveTapeObject";
 
 
 /**
- * A simple Hello World view component that demonstrates basic layout and styling
+ * Palette for adding items 
  */
 const Palette = () => {
   return (
