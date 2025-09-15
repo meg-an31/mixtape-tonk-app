@@ -19,6 +19,7 @@ export class SyncService {
     private static tonk?: any;
     private static initialized = false;
     private static initializing = false;
+    // palette is objects, tape is positions
     public static readonly ObjectsPath = "/objects.json";
     public static readonly PositionsPath = "/positions.json";
     private static initPromise?: Promise<void>;
@@ -46,22 +47,26 @@ export class SyncService {
             storage: { type: 'indexeddb' },
         });
 
-        console.log(this.wsUrl);
         // Create a sync engine
         await this.tonk.connectWebsocket('ws://localhost:6080'); 
-        
+
         try {
             await this.tonk.exists(this.PositionsPath);
+            console.log("this exists");
         }
         catch (error) {
             console.log("No root doc found, initialising new tonk");
             this.tonk = await TonkCore.TonkCore.create();
             console.log(await this.tonk.toBytes());
         }
+        const a = (await this.tonk.exists(this.PositionsPath));
 
-        if (this.tonk && !(await this.tonk.exists(this.PositionsPath))) {
+        if (this.tonk && !a) {
             console.log("positions file does not exist, creating......");
             await this.tonk.createFile(this.PositionsPath, '');
+        }
+        else {
+            console.log(await this.tonk.readFile(this.PositionsPath));
         }
         
         // TODO: remove dependency upon testingObjects

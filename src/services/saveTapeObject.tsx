@@ -5,10 +5,6 @@ import { TapeObjectEditorData } from '../components/TapeObjectEditor';
 import { SyncService } from './syncService';
 import { loadPaletteObjects, loadTapeObjects, storePaletteObject, storeTapeObject } from './getDataService';
 
-// TODO: change this
-// right now this IS being used by the add object to palette view
-// BUT needs to be changed
-// have not tested in any capacity 
 
 export async function saveTapeObject(data: TapeObjectEditorData) {
 
@@ -32,4 +28,24 @@ export async function saveTapeObject(data: TapeObjectEditorData) {
     await storePaletteObject(newItem);
     console.log(await loadPaletteObjects());
   }
+}
+
+const fileToUint8Arr = async (file: File): Promise<Uint8Array> => {
+  const arrayBuffer = await file.arrayBuffer();
+  return new Uint8Array(arrayBuffer);
+};
+
+/**
+ * Svae images in correct format
+ */
+
+export async function saveImageObject(image: File) {
+  const new_id = "image-" + Date.now().toString();
+  const newItem: imageObject = {
+    id: new_id,
+    name: image.name,
+    mime: image.type,
+    blob: await fileToUint8Arr(image),
+  };
+  await storePaletteObject(newItem);
 }

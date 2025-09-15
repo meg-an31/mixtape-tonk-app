@@ -14,8 +14,11 @@ export async function getCoreData() : Promise<{dataList: TapeObject[]}> {
 export async function loadTapeObjects(): Promise<{[key: string]: {tapeObj: TapeObject}}> {
     await SyncService.init(); 
     const vfs = await SyncService.gettonk(); 
-    const content_only = ((await vfs.readFile(SyncService.PositionsPath) as JsonObj).content);
-    //console.log(content_only);
+    console.log("hello im inside the load tepe objs");
+    const raw_text = await vfs.readFile(SyncService.PositionsPath);
+    console.log(raw_text);
+    const content_only = ((raw_text as JsonObj).content);
+    console.log(content_only);
     var objects_raw = JSON.parse(content_only);
     console.log(objects_raw);
     // var objects_raw = JSON.parse(JSON.parse(await vfs.readFile(SyncService.PositionsPath)).content);
@@ -69,6 +72,8 @@ interface JsonObj {
 export async function loadPaletteObjects(): Promise<PaletteObject[]> {
     await SyncService.init();
     const vfs = await SyncService.gettonk();
+    console.log("hi");
+    console.log(await vfs.readFile(SyncService.ObjectsPath));
     const content_only = ((await vfs.readFile(SyncService.ObjectsPath) as JsonObj).content);
     console.log(JSON.parse(JSON.parse(content_only)));
     var objects_raw = JSON.parse(JSON.parse(content_only)).objects as PaletteObject[];
