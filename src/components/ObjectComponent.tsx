@@ -48,10 +48,6 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
   [id, left, top, type],
 );
 
-    if (isDragging) {
-    return (<div ref={drag as any} />)
-  }
-
   const baseStyle = {
     opacity: isDragging ? opacity : 1,
     cursor: 'move',

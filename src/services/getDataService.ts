@@ -2,7 +2,7 @@ import { PaletteObject, TapeObject } from "../types/ScrollBoxData";
 import { SyncService } from './syncService';
 
 export async function getCoreData() : Promise<{dataList: TapeObject[]}> {
-    const vfs = await SyncService.getVfs();
+    const vfs = await SyncService.gettonk();
     const content = JSON.parse(JSON.parse(await vfs.readFile('/data.json')).content);
 
     console.log(`data: ${content}`);
@@ -13,8 +13,12 @@ export async function getCoreData() : Promise<{dataList: TapeObject[]}> {
 // Load all objects available on the tape 
 export async function loadTapeObjects(): Promise<{[key: string]: {tapeObj: TapeObject}}> {
     await SyncService.init(); 
-    const vfs = await SyncService.getVfs(); 
-    var objects_raw = JSON.parse(JSON.parse(await vfs.readFile(SyncService.PositionsPath)).content);
+    const vfs = await SyncService.gettonk(); 
+    const content_only = ((await vfs.readFile(SyncService.PositionsPath) as JsonObj).content);
+    //console.log(content_only);
+    var objects_raw = JSON.parse(content_only);
+    console.log(objects_raw);
+    // var objects_raw = JSON.parse(JSON.parse(await vfs.readFile(SyncService.PositionsPath)).content);
     try {
         const test = JSON.parse(objects_raw);
         objects_raw = test;
@@ -43,7 +47,7 @@ export async function storeTapeObject( key: string, tapeObject: TapeObject) {
         tapeObj: tapeObject
       }
     })
-    const vfs = await SyncService.getVfs();
+    const vfs = await SyncService.gettonk();
     vfs.deleteFile(SyncService.PositionsPath);
     await vfs.createFile(SyncService.PositionsPath, JSON.stringify(new_tape_objs, null, 2));
 }
@@ -52,18 +56,23 @@ export async function storeTapeObject( key: string, tapeObject: TapeObject) {
 export async function removeTapeObject(key: string) {
     var old_tape_objs = await loadTapeObjects();
     const { [key]: removed, ...new_tape_objs } = old_tape_objs;
-    const vfs = await SyncService.getVfs();
+    const vfs = await SyncService.gettonk();
     vfs.deleteFile(SyncService.PositionsPath);
     await vfs.createFile(SyncService.PositionsPath, JSON.stringify(new_tape_objs, null, 2));
+}
+
+interface JsonObj {
+    content: string;
 }
 
 // Load all objects available on the palette
 export async function loadPaletteObjects(): Promise<PaletteObject[]> {
     await SyncService.init();
-    const vfs = await SyncService.getVfs();
-    console.log("getting peer id...");
-    const peerId = await SyncService.getPeerId();
-    var objects_raw: PaletteObject[]= JSON.parse(JSON.parse(JSON.parse(await vfs.readFile(SyncService.ObjectsPath)).content)).objects;
+    const vfs = await SyncService.gettonk();
+    const content_only = ((await vfs.readFile(SyncService.ObjectsPath) as JsonObj).content);
+    console.log(JSON.parse(JSON.parse(content_only)));
+    var objects_raw = JSON.parse(JSON.parse(content_only)).objects as PaletteObject[];
+    console.log(objects_raw);
     
     // Fix corrupted Uint8Array data from JSON serialization
     objects_raw = objects_raw.map(obj => {
@@ -85,16 +94,17 @@ export async function loadPaletteObjects(): Promise<PaletteObject[]> {
 export async function storePaletteObject(paletteObject: PaletteObject) {
     const old_palette_objs = await loadPaletteObjects();
     old_palette_objs.push(paletteObject);
-    const vfs = await SyncService.getVfs();
+    const vfs = await SyncService.gettonk();
     vfs.deleteFile(SyncService.ObjectsPath);
-    await vfs.createFile(SyncService.ObjectsPath, JSON.stringify(old_palette_objs, null, 2));
+    await vfs.createFile(SyncService.ObjectsPath, JSON.stringify({objects: old_palette_objs}, null, 2));
+    console.log(old_palette_objs);
 }
 
 // Remove using an id
 export async function removePaletteObject(id: string) {
     const old_palette_objs = await loadPaletteObjects();
     const new_palette_objs = old_palette_objs.filter(item => item.id !== id);
-    const vfs = await SyncService.getVfs();
+    const vfs = await SyncService.gettonk();
     vfs.deleteFile(SyncService.ObjectsPath);
     await vfs.createFile(SyncService.ObjectsPath, JSON.stringify(new_palette_objs, null, 2));
 }

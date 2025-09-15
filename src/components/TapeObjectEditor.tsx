@@ -36,6 +36,7 @@ const TapeObjectEditor: React.FC<TapeObjectEditorProps> = ({
   const [imageData, setImageData] = useState<imageObject>({
     name: initialData?.imageObject?.name ?? 'hello world',
     blob: initialData?.imageObject?.blob ?? new Uint8Array(),
+    mime: initialData?.imageObject?.mime ?? "image/png"
   });
   
   const [linkData, setLinkData] = useState<linkObject>({
