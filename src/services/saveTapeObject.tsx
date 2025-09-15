@@ -1,7 +1,7 @@
 import React from 'react';
 import { TapeObject, textObject, imageObject, linkObject } from "../types/ScrollBoxData";
 import { TapeObjectEditorData } from '../components/TapeObjectEditor';
-import { initializeTonk, createSyncEngine } from '@tonk/core';
+//import { initializeTonk, createSyncEngine } from '@tonk/core';
 import { SyncService } from './syncService';
 import { loadPaletteObjects, loadTapeObjects, storePaletteObject, storeTapeObject } from './getDataService';
 

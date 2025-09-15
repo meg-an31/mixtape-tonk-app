@@ -1,7 +1,10 @@
 import { BrowserWebSocketClientAdapter } from "@automerge/automerge-repo-network-websocket";
 import { IndexedDBStorageAdapter } from "@automerge/automerge-repo-storage-indexeddb";
-import { createSyncEngine, SyncEngine, VirtualFileSystem, initializeTonk } from '@tonk/core';
-import { testingObjects } from "../stores/temp_data";
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { testingObjects } from "../data/temp_data";
+import { TonkCore } from "/Users/meganwalker/tonk-blob-pr/three/tonk/packages/core-js/dist/index.js";
+
 
 /*
     FOR TESTING PURPOSES:
@@ -13,8 +16,7 @@ export class SyncService {
     private static wsUrl: string;
     private static wsAdapter: BrowserWebSocketClientAdapter;
     private static storage: IndexedDBStorageAdapter;
-    private static engine?: SyncEngine;
-    private static vfs?: VirtualFileSystem;
+    private static tonk?: any;
     private static initialized = false;
     private static initializing = false;
     public static readonly ObjectsPath = "/objects.json";
@@ -28,30 +30,50 @@ export class SyncService {
         this.wsUrl = `${this.wsProtocol}//${window.location.host}/sync`;
         this.wsAdapter = new BrowserWebSocketClientAdapter(this.wsUrl);
         this.storage = new IndexedDBStorageAdapter();
-        
-        await initializeTonk();
-        
-        // Create a sync engine
-        // TODO: replace this with getting the root doc
-        this.engine = await createSyncEngine();
-        await this.engine.connectWebsocket(this.wsUrl); 
-        
-        // Get the virtual file system
-        this.vfs = await this.engine.getVfs();
-        
-        if (this.vfs && !(await this.vfs.exists(this.PositionsPath))) {
-            console.log("positions file does not exist, creating......");
-            await this.vfs.createFile(this.PositionsPath, '');
+        const TonkCore = await import('/Users/meganwalker/tonk-blob-pr/three/tonk/packages/core-js/dist/index.js');
+
+        const response = await fetch('http://localhost:6080/.manifest.tonk');
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch bundle: ${response.status} ${response.statusText}`);
         }
-    
-        if (this.vfs && !(await this.vfs.exists(this.ObjectsPath))) {
+
+        const arrayBuffer = await response.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        console.log(bytes);
+        
+        this.tonk = await TonkCore.TonkCore.fromBytes(bytes, {
+            storage: { type: 'indexeddb' },
+        });
+
+        console.log(this.wsUrl);
+        // Create a sync engine
+        await this.tonk.connectWebsocket('ws://localhost:6080'); 
+        
+        try {
+            await this.tonk.exists(this.PositionsPath);
+        }
+        catch (error) {
+            console.log("No root doc found, initialising new tonk");
+            this.tonk = await TonkCore.TonkCore.create();
+            console.log(await this.tonk.toBytes());
+        }
+
+        if (this.tonk && !(await this.tonk.exists(this.PositionsPath))) {
+            console.log("positions file does not exist, creating......");
+            await this.tonk.createFile(this.PositionsPath, '');
+        }
+        
+        // TODO: remove dependency upon testingObjects
+        if (this.tonk && !(await this.tonk.exists(this.ObjectsPath))) {
             await this.getPeerId();
             console.log("objects file does not exist, creating......");
-            const b = await this.vfs.exists(this.ObjectsPath); 
+            const b = await this.tonk.exists(this.ObjectsPath); 
             if (!b) {
-                await this.vfs.createFile(this.ObjectsPath, JSON.stringify(testingObjects, null, 2));
+                const objects = testingObjects;
+                await this.tonk.createFile(this.ObjectsPath, JSON.stringify(objects, null, 2));
             }
-            const t = await this.vfs.readFile(this.ObjectsPath);
+            const t = await this.tonk.readFile(this.ObjectsPath);
             console.log(t);
         }
         this.initializing = false;
@@ -78,23 +100,23 @@ export class SyncService {
     }
 
     static async getPeerId(): Promise<string> {
-        if (!this.engine) {
-            throw new Error('Engine not initialized. Call SyncService.init() first.');
+        if (!this.tonk) {
+            throw new Error('Tonk not initialized. Call SyncService.init() first.');
         }
         // Get the peer ID
-        const peerId = await this.engine.getPeerId();
+        const peerId = await this.tonk.getPeerId();
         console.log('Peer ID:', peerId);
         return peerId;
     }
 
-    static async getEngine(): Promise<SyncEngine> {
+    static async getEngine(): Promise<TonkCore> {
         if (!this.isInitialized()) { await this.init();}
-        return this.engine;
+        return this.tonk;
     }
 
-    static async getVfs(): Promise<VirtualFileSystem> {
+    static async gettonk(): Promise<TonkCore> {
         if (!this.isInitialized()) { await this.init();}
-        return this.vfs;
+        return this.tonk;
     }
 
     static isInitialized(): boolean {
