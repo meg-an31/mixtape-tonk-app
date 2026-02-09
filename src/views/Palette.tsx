@@ -1,5 +1,8 @@
 import TapeObjectEditor from "../components/TapeObjectEditor";
-import { saveTapeObject } from "../services/saveTapeObject";
+import ImageDropZone from "../components/ImageDropZone";
+import { saveTapeObject, saveImageObject } from "../services/saveTapeObject";
+
+
 
 
 /**
@@ -13,6 +16,11 @@ const Palette = () => {
            <section>
               <h3 className="text-sm font-medium text-gray-700 mb-3">drop your links, writing, and pictures here!</h3>
               <TapeObjectEditor onSave={saveTapeObject} />
+            </section>
+            
+            <section className="mt-8">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">upload images</h3>
+              <ImageDropZone onImageSelected={saveImageObject} />
             </section>
         </section>
       </main>

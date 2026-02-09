@@ -26,14 +26,16 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDraggingResize, setIsDraggingResize] = useState(false);
-  const [isRecalculating, setIsRecalculating] = useState(false);
   const renderObjectContent = () => {
     if (!("url" in item) && !("blob" in item)) {
       const textObj = item as textObject;
       return (
         <span 
-          className="text-sm font-medium"
-          style={{ color: textObj.textColour }}
+          className="font-medium"
+          style={{ 
+            color: textObj.textColour,
+            fontSize: `${14 * scale}px`
+          }}
         >
           {textObj.text}
         </span>
@@ -43,8 +45,11 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
       return (
         <a 
           href={linkObj.url}
-          className="text-sm font-medium underline hover:no-underline"
-          style={{ color: linkObj.textColour }}
+          className="font-medium underline hover:no-underline"
+          style={{ 
+            color: linkObj.textColour,
+            fontSize: `${14 * scale}px`
+          }}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
@@ -69,7 +74,7 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
         return () => URL.revokeObjectURL(imageUrl);
       }, [imageUrl]);
  */
-      return (<img src={imageUrl} alt="Image" style={{minWidth: '20px', minHeight: '20px', imageRendering: 'pixelated'}} />);
+      return (<img src={imageUrl} alt="Image" style={{width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated'}} />);
     }
     return null;
   };
@@ -80,15 +85,6 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
     }
   };
 
-  const forceTransformRecalculation = () => {
-    setIsRecalculating(true);
-    // Force a layout recalculation by temporarily removing transform
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setIsRecalculating(false);
-      });
-    });
-  };
 
   const handleResizeMouseDown = (direction: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -130,8 +126,6 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
       setIsDraggingResize(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-      // Force recalculation after resize operation
-      forceTransformRecalculation();
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -146,10 +140,10 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
     >
       <div 
         style={{ 
-          width: width ? `${width}px` : 'auto',
-          height: height ? `${height}px` : 'auto',
-          minWidth: '50px',
-          minHeight: '30px',
+          width: width ? `${width * scale}px` : ('blob' in item ? `${200 * scale}px` : 'auto'),
+          height: height ? `${height * scale}px` : ('blob' in item ? `${200 * scale}px` : 'auto'),
+          minWidth: `${50 * scale}px`,
+          minHeight: `${30 * scale}px`,
           position: 'relative',
           overflow: 'visible',
           border: isHovered ? '1px dashed rgba(255,255,255,0.3)' : 'none'
@@ -157,8 +151,6 @@ const MainBoxTapeItem: React.FC<MainBoxTapeItemProps> = ({
       >
         <div
           style={{ 
-            transform: isRecalculating ? 'none' : `scale(${scale})`,
-            transformOrigin: '50% 50%',
             position: 'relative',
             width: '100%',
             height: '100%'
